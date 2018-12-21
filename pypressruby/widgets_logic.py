@@ -8,7 +8,7 @@ from PyQt5.QtCore import QObject
 import numpy as np
 from time import sleep
 import _thread as thread
-from modules.logic import make_dummy,fit_data,two_gaussians,calculate_pressure
+from pypressruby.logic import make_dummy,fit_data,two_gaussians,calculate_pressure
 
 class LogicWidgets(QObject):
     def __init__(self,status,options,plot):

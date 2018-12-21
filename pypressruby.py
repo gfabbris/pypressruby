@@ -4,7 +4,7 @@
 '''
 
 import sys
-from modules.main_widget import MainWindow
+from pypressruby.main_widget import MainWindow
 from PyQt5.QtWidgets import QApplication
 
 app = QApplication(sys.argv)

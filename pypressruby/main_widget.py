@@ -5,11 +5,9 @@
 
 from PyQt5.QtWidgets import QMainWindow,QApplication,QWidget,QGridLayout,QMessageBox
 
-from modules.plot_widget import PlotWidget
-from modules.options_widget import OptionsWidget
-from modules.widgets_logic import LogicWidgets
-
-from time import sleep
+from pypressruby.plot_widget import PlotWidget
+from pypressruby.options_widget import OptionsWidget
+from pypressruby.widgets_logic import LogicWidgets
 
 class MainWindow(QMainWindow):
 
