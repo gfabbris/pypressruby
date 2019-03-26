@@ -122,7 +122,7 @@ class GraphWidget(QGroupBox):
         #self.ymin = QTextEdit('0')
         self.ymin = QSpinBox()
         self.ymin.setMaximum(15000)
-        self.ymin.setMinimum(0)
+        self.ymin.setMinimum(-10000)
         self.ymin.setValue(0)
         self.ymin.setMaximumHeight(25)
         self.ymin.setMaximumWidth(100)
@@ -130,7 +130,7 @@ class GraphWidget(QGroupBox):
         #self.ymax = QTextEdit('2000')
         self.ymax = QSpinBox()
         self.ymax.setMaximum(15000)
-        self.ymax.setMinimum(0)
+        self.ymax.setMinimum(-10000)
         self.ymax.setValue(2000)
         self.ymax.setMaximumHeight(25)
         self.ymax.setMaximumWidth(100)
@@ -189,19 +189,19 @@ class PressureWidget(QGroupBox):
         
         self.firstpeak_reference = QTextEdit('693.7')
         self.firstpeak_reference.setMaximumHeight(25)
-        self.firstpeak_reference.setMaximumWidth(60)
+        self.firstpeak_reference.setMaximumWidth(80)
         
         self.firstpeak_value = QTextEdit('693.7')
         self.firstpeak_value.setMaximumHeight(25)
-        self.firstpeak_value.setMaximumWidth(60)
+        self.firstpeak_value.setMaximumWidth(80)
                 
         self.secondpeak_reference = QTextEdit('694.3')
         self.secondpeak_reference.setMaximumHeight(25)
-        self.secondpeak_reference.setMaximumWidth(60)
+        self.secondpeak_reference.setMaximumWidth(80)
         
         self.secondpeak_value = QTextEdit('694.3')
         self.secondpeak_value.setMaximumHeight(25)
-        self.secondpeak_value.setMaximumWidth(60)
+        self.secondpeak_value.setMaximumWidth(80)
         
         self.temperature_label = QLabel('Temp. (K):')
         
@@ -214,6 +214,7 @@ class PressureWidget(QGroupBox):
         self.temperature_value.setMaximumWidth(50)
 
         self.fit_button = QPushButton('Fit')
+        self.clearfit_button = QPushButton('Clear Fit')
         
         self.temperature_button = QPushButton('Estimate Temp.')
         
@@ -253,6 +254,7 @@ class PressureWidget(QGroupBox):
         
         self._extras_layout = QHBoxLayout()        
         self._extras_layout.addWidget(self.fit_button)
+        self._extras_layout.addWidget(self.clearfit_button)
         self._extras_layout.addWidget(self.pressure_reference)
             
         self._buttons_layout = QHBoxLayout()        

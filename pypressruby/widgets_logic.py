@@ -46,7 +46,8 @@ class LogicWidgets(QObject):
         self.spectrometer.dark_button.clicked.connect(self.collect_dark)
         self.spectrometer.dark_box.stateChanged.connect(self.dark_msg)
         
-        self.pressure.fit_button.clicked.connect(self.run_fit)    
+        self.pressure.fit_button.clicked.connect(self.run_fit)   
+        self.pressure.clearfit_button.clicked.connect(self.clear_fit)     
         self.pressure.pressure_button.clicked.connect(self.get_pressure)
         
         self.plot.canvas.mpl_connect('button_press_event', self.onclick)
@@ -113,11 +114,11 @@ class LogicWidgets(QObject):
     
     def start_spectrometer(self):
                     
-        gauss = make_dummy(self.x)
+        #gauss = make_dummy(self.x)
         
         while self.stop_signal != 0:
 
-            self.y = self.spec.intensities() + gauss
+            self.y = self.spec.intensities()# + gauss
             
             if self.spectrometer.dark_box.isChecked():
                 if self.dark is not None:
@@ -133,9 +134,15 @@ class LogicWidgets(QObject):
     def collect_dark(self):
         
         if self.stop_signal != 0:
-            self.dark = np.copy(self.y)
+            restart = True
+            self.stop_spectrometer()
         else:
-            self.dark = self.spec.intensities()
+            restart = False
+
+        self.dark = self.spec.intensities()
+        
+        if restart is True:
+            self.collect_dark()
         
         self.status.showMessage('Ready!')
             
@@ -219,6 +226,10 @@ class LogicWidgets(QObject):
             self.pressure.firstpeak_value.setText('{:.2f}'.format(first))
             self.pressure.secondpeak_value.setText('{:.2f}'.format(second))
             
+    def clear_fit(self):
+        
+        if self.fit is not None:
+            self.ax.lines.remove(self.fit)
             
     def get_pressure(self):
         
