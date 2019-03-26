@@ -142,7 +142,7 @@ class LogicWidgets(QObject):
         self.dark = self.spec.intensities()
         
         if restart is True:
-            self.collect_dark()
+            self.collect_signal()
         
         self.status.showMessage('Ready!')
             
