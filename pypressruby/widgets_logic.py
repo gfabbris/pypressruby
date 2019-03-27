@@ -46,6 +46,8 @@ class LogicWidgets(QObject):
         self.spectrometer.dark_button.clicked.connect(self.collect_dark)
         self.spectrometer.dark_box.stateChanged.connect(self.dark_msg)
         
+        self.spectrometer.integrate.textChanged.connect(self.change_integrate)
+        
         self.pressure.fit_button.clicked.connect(self.run_fit)   
         self.pressure.clearfit_button.clicked.connect(self.clear_fit)     
         self.pressure.pressure_button.clicked.connect(self.get_pressure)
@@ -265,4 +267,15 @@ class LogicWidgets(QObject):
         self.vline = self.ax.axvline(x=x0,ls='--',lw=1,color='blue')
         if self.timer is None:
             self.single_canvas_update()
-                
+    
+    def change_integrate(self):
+        try:
+            value = float(self.spectrometer.integrate.toPlainText())
+            if value > 1:
+                if self.spectrometer.dark_box.isChecked():
+                    self.collect_dark()
+                else:
+                    self.integration_time = float(self.spectrometer.integrate.toPlainText())
+                    self.spec.integration_time_micros(1E3*self.integration_time)
+        except ValueError:
+            pass
