@@ -128,7 +128,7 @@ class LogicWidgets(QObject):
         
     def stop_spectrometer(self):  
         self.stop_signal = 0
-        sleep(0.1)
+        sleep(self.integration_time*1.05/1000)
         if self.timer:
             self.timer.stop()
             self.timer = None
@@ -140,6 +140,8 @@ class LogicWidgets(QObject):
             self.stop_spectrometer()
         else:
             restart = False
+            self.integration_time = float(self.spectrometer.integrate.toPlainText())
+            self.spec.integration_time_micros(1E3*self.integration_time)
 
         self.dark = self.spec.intensities()
         
