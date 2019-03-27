@@ -8,7 +8,7 @@ from PyQt5.QtCore import QObject
 import numpy as np
 from time import sleep
 import _thread as thread
-from pypressruby.logic import make_dummy,fit_data,two_gaussians,calculate_pressure
+from pypressruby.logic import make_dummy,fit_data,calculate_pressure
 
 class LogicWidgets(QObject):
     def __init__(self,status,options,plot):
@@ -32,6 +32,8 @@ class LogicWidgets(QObject):
         self.stop_signal = 0
         self.timer = None
         self.integration_time = float(self.spectrometer.integrate.toPlainText())
+        
+        self.test_option = False
 
         self.load_devices()
                
@@ -97,34 +99,48 @@ class LogicWidgets(QObject):
             self.stop_spectrometer()
         
         if self.spec is not None:
-            
-            self.integration_time = float(self.spectrometer.integrate.toPlainText())
-            self.spec.integration_time_micros(1E3*self.integration_time)
         
             self.stop_signal = 1
+        
+            self.integration_time = float(self.spectrometer.integrate.toPlainText())
+            self.spec.integration_time_micros(1E3*self.integration_time)
             
             self.x = self.spec.wavelengths()
             self.y = self.spec.intensities()
         
             self.start_figure()
-            
+        
             thread.start_new_thread(self.start_spectrometer,())
             
             self.status.showMessage('Ready!')
         else:
             self.status.showMessage('Spectrometer is not loaded!')
+            
+            if self.test_option is True:
+                
+                self.stop_signal = 1
+                self.x = np.linspace(650,850,1000)
+                self.y = make_dummy(self.x)+(np.random.rand(self.x.size)-0.5)*10
+            
+                self.start_figure()
+            
+                thread.start_new_thread(self.start_dummy,())
     
     def start_spectrometer(self):
-                    
-        #gauss = make_dummy(self.x)
         
         while self.stop_signal != 0:
 
-            self.y = self.spec.intensities()# + gauss
+            self.y = self.spec.intensities()
             
             if self.spectrometer.dark_box.isChecked():
                 if self.dark is not None:
                     self.y -= self.dark
+                    
+    def start_dummy(self):
+        
+        while self.stop_signal != 0:
+            sleep(self.integration_time/1000)
+            self.y = make_dummy(self.x,amplitude1=50)+(np.random.rand(self.x.size)-0.5)*10
         
     def stop_spectrometer(self):  
         self.stop_signal = 0
@@ -204,7 +220,7 @@ class LogicWidgets(QObject):
         
         if self.timer is None:
             self.single_canvas_update()
-    
+            
     def run_fit(self):
         
         xmin,xmax = self.ax.get_xlim()
@@ -215,16 +231,11 @@ class LogicWidgets(QObject):
         else:
             if self.fit is not None:
                 self.ax.lines.remove(self.fit)
-                
-            self.fit = self.ax.plot(self.x,two_gaussians(self.x,*result),color='red')[0]
             
-            if result[2] < result[5]:
-                first = result[2]
-                second = result[5]
-            else:
-                first = result[5]
-                second = result[2]
+            self.fit = self.ax.plot(self.x,result.eval(x=self.x),color='red')[0]
             
+            first = result.best_values['peak1_center']
+            second = result.best_values['peak2_center']
             
             self.plot_vline(second)
             self.pressure.firstpeak_value.setText('{:.2f}'.format(first))
@@ -278,6 +289,7 @@ class LogicWidgets(QObject):
                     self.collect_dark()
                 else:
                     self.integration_time = float(self.spectrometer.integrate.toPlainText())
-                    self.spec.integration_time_micros(1E3*self.integration_time)
+                    if self.test_option is False:
+                        self.spec.integration_time_micros(1E3*self.integration_time)
         except ValueError:
             pass

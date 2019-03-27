@@ -7,8 +7,9 @@ import numpy as np
 
 from scipy.optimize import curve_fit
 
-def make_dummy(x,
-               amplitude1=100,sigma1=0.5,x01=695,constant1=1,
+from lmfit.models import ConstantModel, PseudoVoigtModel
+
+def make_dummy(x,amplitude1=100,sigma1=0.5,x01=695,constant1=1,
                amplitude2=200,sigma2=0.5,x02=696.5,constant2=1):
 
     gauss  = gaussian(x,amplitude1,sigma1,x01,constant1)
@@ -27,7 +28,7 @@ def two_gaussians(x,amplitude1,sigma1,x01,
     
     return y
 
-def fit_data(xoriginal,y,xmin=None,xmax=None):
+def fit_data_curvefit(xoriginal,y,xmin=None,xmax=None):
 
     if y is None:
         return 'No spectrum! Fit not performed!'
@@ -63,6 +64,46 @@ def fit_data(xoriginal,y,xmin=None,xmax=None):
             return pfit
         except RuntimeError:
             return 'Fit failed! Try changing initial parameters.'
+        
+        
+def fit_data(x,y,xmin=None,xmax=None):
+    
+    if y is None:
+        return 'No spectrum! Fit not performed!'
+    else:
+        
+        if xmin is None:
+            xmin = x.min()
+        elif xmin < x.min():
+            xmin = x.min()
+        
+        if xmax is None:
+            xmax = x.max()
+        elif xmax < x.max():
+            xmax = x.max()
+            
+        y = np.copy(y[np.logical_and(x>xmin,x<xmax)])
+        x = np.copy(x[np.logical_and(x>xmin,x<xmax)])
+        
+        mod = ConstantModel() + PseudoVoigtModel(prefix='peak1_') + PseudoVoigtModel(prefix='peak2_')
+        params = mod.make_params()
+        
+        params['c'].set(0)
+        
+        params['peak1_center'].set(x[y==y.max()]-0.7,min=x[y==y.max()]-5,max=x[y==y.max()])
+        params['peak1_sigma'].set(0.5,min=0)
+        params['peak1_amplitude'].set(y.max()*0.5*np.sqrt(2*np.pi)/2,min=0)
+        params['peak1_fraction'].set(0.5,min=0,max=1)
+        
+        params['peak2_center'].set(x[y==y.max()],min=x[y==y.max()]-0.5,max=x.max())
+        params['peak2_sigma'].set(0.5,min=0)
+        params['peak2_amplitude'].set(y.max()*0.5*np.sqrt(2*np.pi),min=0)
+        params['peak2_fraction'].set(0.5,min=0,max=1)
+        
+        fit = mod.fit(y,params,x=x)
+        
+        return fit
+        
 
 def calculate_pressure(wavenumber,wavenumber_ref,temperature,temperature_ref,
                        reference='Dewaele et al. 2008'):

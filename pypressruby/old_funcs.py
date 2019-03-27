@@ -161,3 +161,30 @@
             dy = (self.y.max()-self.y.min())*0.05
             self.ax.set_ylim(self.y.min()-dy,self.y.max()+dy)
             
+            
+        
+    def run_fit(self):
+        
+        xmin,xmax = self.ax.get_xlim()
+        result = fit_data(self.x,self.y,xmin=xmin,xmax=xmax)
+        
+        if type(result) is str:
+            self.status.showMessage(result)
+        else:
+            if self.fit is not None:
+                self.ax.lines.remove(self.fit)
+                
+            self.fit = self.ax.plot(self.x,two_gaussians(self.x,*result),color='red')[0]
+            
+            if result[2] < result[5]:
+                first = result[2]
+                second = result[5]
+            else:
+                first = result[5]
+                second = result[2]
+            
+            
+            self.plot_vline(second)
+            self.pressure.firstpeak_value.setText('{:.2f}'.format(first))
+            self.pressure.secondpeak_value.setText('{:.2f}'.format(second))
+            
