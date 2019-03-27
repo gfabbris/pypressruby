@@ -151,6 +151,9 @@ class LogicWidgets(QObject):
         
     def collect_dark(self):
         
+        if self.spec is None:
+            return
+        
         if self.stop_signal != 0:
             restart = True
             self.stop_spectrometer()
@@ -195,6 +198,9 @@ class LogicWidgets(QObject):
         self.plot.canvas.draw()
         
     def update_xlimit(self):
+        
+        if self.spec is None:
+            return
 
         autox = self.graph.xauto_box.isChecked()
         if autox:
@@ -208,6 +214,9 @@ class LogicWidgets(QObject):
             
     def update_ylimit(self):
 
+        if self.spec is None:
+            return
+        
         autoy = self.graph.yauto_box.isChecked()
         if autoy:
             if (self.y.min() == 0) & (self.y.max() == 0):
@@ -222,6 +231,9 @@ class LogicWidgets(QObject):
             self.single_canvas_update()
             
     def run_fit(self):
+        
+        if self.spec is None:
+            return
         
         xmin,xmax = self.ax.get_xlim()
         result = fit_data(self.x,self.y,xmin=xmin,xmax=xmax)
@@ -282,6 +294,10 @@ class LogicWidgets(QObject):
             self.single_canvas_update()
     
     def change_integrate(self):
+        
+        if self.spec is None:
+            return
+        
         try:
             value = float(self.spectrometer.integrate.toPlainText())
             if value > 1:
