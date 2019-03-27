@@ -188,3 +188,50 @@
             self.pressure.firstpeak_value.setText('{:.2f}'.format(first))
             self.pressure.secondpeak_value.setText('{:.2f}'.format(second))
             
+            
+
+def two_gaussians(x,amplitude1,sigma1,x01,
+                    amplitude2,sigma2,x02,constant):
+    
+    y = gaussian(x,amplitude1,sigma1,x01,constant)
+    y += gaussian(x,amplitude2,sigma2,x02,constant)
+    
+    return y
+
+def fit_data_curvefit(xoriginal,y,xmin=None,xmax=None):
+
+    if y is None:
+        return 'No spectrum! Fit not performed!'
+    else:
+        
+        if xmin is None:
+            xmin = xoriginal.min()
+        elif xmin < xoriginal.min():
+            xmin = xoriginal.min()
+        
+        if xmax is None:
+            xmax = xoriginal.max()
+        elif xmax < xoriginal.max():
+            xmax = xoriginal.max()
+        
+        x = xoriginal[np.logical_and(xoriginal>xmin,xoriginal<xmax)]
+        y = y[np.logical_and(xoriginal>xmin,xoriginal<xmax)]
+        
+        x01 = x[y==y.max()]
+        sigma1 = 0.5
+        amplitude1 = y.max()*sigma1*np.sqrt(2*np.pi)
+        
+        x02 = x01-0.7
+        sigma2 = 0.5
+        amplitude2 = amplitude1/2.
+        
+        constant = y.min()
+
+        p0 = [amplitude1,sigma1,x01,amplitude2,sigma2,x02,constant]
+        
+        try:
+            pfit,pcov = curve_fit(two_gaussians,x,y,p0=p0)
+            return pfit
+        except RuntimeError:
+            return 'Fit failed! Try changing initial parameters.'
+            

@@ -19,51 +19,6 @@ def make_dummy(x,amplitude1=100,sigma1=0.5,x01=695,constant1=1,
     
 def gaussian(x,amplitude,sigma,x0,constant):
     return amplitude/sigma/np.sqrt(2*np.pi)*np.exp(-(x-x0)**2/2/sigma**2)+constant
-
-def two_gaussians(x,amplitude1,sigma1,x01,
-                    amplitude2,sigma2,x02,constant):
-    
-    y = gaussian(x,amplitude1,sigma1,x01,constant)
-    y += gaussian(x,amplitude2,sigma2,x02,constant)
-    
-    return y
-
-def fit_data_curvefit(xoriginal,y,xmin=None,xmax=None):
-
-    if y is None:
-        return 'No spectrum! Fit not performed!'
-    else:
-        
-        if xmin is None:
-            xmin = xoriginal.min()
-        elif xmin < xoriginal.min():
-            xmin = xoriginal.min()
-        
-        if xmax is None:
-            xmax = xoriginal.max()
-        elif xmax < xoriginal.max():
-            xmax = xoriginal.max()
-        
-        x = xoriginal[np.logical_and(xoriginal>xmin,xoriginal<xmax)]
-        y = y[np.logical_and(xoriginal>xmin,xoriginal<xmax)]
-        
-        x01 = x[y==y.max()]
-        sigma1 = 0.5
-        amplitude1 = y.max()*sigma1*np.sqrt(2*np.pi)
-        
-        x02 = x01-0.7
-        sigma2 = 0.5
-        amplitude2 = amplitude1/2.
-        
-        constant = y.min()
-
-        p0 = [amplitude1,sigma1,x01,amplitude2,sigma2,x02,constant]
-        
-        try:
-            pfit,pcov = curve_fit(two_gaussians,x,y,p0=p0)
-            return pfit
-        except RuntimeError:
-            return 'Fit failed! Try changing initial parameters.'
         
         
 def fit_data(x,y,xmin=None,xmax=None):
@@ -90,12 +45,12 @@ def fit_data(x,y,xmin=None,xmax=None):
         
         params['c'].set(0)
         
-        params['peak1_center'].set(x[y==y.max()]-0.7,min=x[y==y.max()]-5,max=x[y==y.max()])
+        params['peak1_center'].set(x[y==y.max()][0]-0.7,min=x[y==y.max()][0]-5,max=x[y==y.max()][0])
         params['peak1_sigma'].set(0.5,min=0)
         params['peak1_amplitude'].set(y.max()*0.5*np.sqrt(2*np.pi)/2,min=0)
         params['peak1_fraction'].set(0.5,min=0,max=1)
         
-        params['peak2_center'].set(x[y==y.max()],min=x[y==y.max()]-0.5,max=x.max())
+        params['peak2_center'].set(x[y==y.max()],min=x[y==y.max()][0]-0.5,max=x.max())
         params['peak2_sigma'].set(0.5,min=0)
         params['peak2_amplitude'].set(y.max()*0.5*np.sqrt(2*np.pi),min=0)
         params['peak2_fraction'].set(0.5,min=0,max=1)
