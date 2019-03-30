@@ -277,9 +277,11 @@ class LogicWidgets(QObject):
             self.status.showMessage('Pressure calculation failed!!!')
     
     def onclick(self,event):
-        if self.ax:
-            self.plot_vline(event.xdata)
-            self.pressure.secondpeak_value.setText('{:.2f}'.format(event.xdata))
+        
+        if self.data_line:
+            if event.xdata:
+                self.plot_vline(event.xdata)
+                self.pressure.secondpeak_value.setText('{:.2f}'.format(event.xdata))
             
     def single_canvas_update(self):
         self.plot.canvas.draw()
