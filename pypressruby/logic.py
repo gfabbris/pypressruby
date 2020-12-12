@@ -3,12 +3,8 @@
  See LICENSE file.
 '''
 
-#Test.
-
 import numpy as np
-
 from scipy.optimize import curve_fit
-
 from lmfit.models import ConstantModel, PseudoVoigtModel
 
 def make_dummy(x,amplitude1=100,sigma1=0.5,x01=695,constant1=1,
