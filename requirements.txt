@@ -1,1 +1,18 @@
 # List required packages in this file, one per line.
+python>=3.6.0
+numpy
+pip
+sphinx
+pytest
+pytest-cov
+flake8
+lmfit
+versioneer
+pyqt
+seabreeze
+matplotlib
+ipython-genutils==0.2.0
+prompt-toolkit==1.0.15
+sphinx-rtd-theme
+super-state-machine
+black
