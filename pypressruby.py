@@ -1,7 +1,7 @@
-'''
- Copyright (c) 2018, UChicago Argonne, LLC
+"""
+ Copyright (c) 2018-2021, UChicago Argonne, LLC
  See LICENSE file.
-'''
+"""
 
 import sys
 from pypressruby.main_widget import MainWindow
