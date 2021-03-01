@@ -4,9 +4,7 @@
 '''
 
 import numpy as np
-
 from scipy.optimize import curve_fit
-
 from lmfit.models import ConstantModel, PseudoVoigtModel
 
 def make_dummy(x,amplitude1=100,sigma1=0.5,x01=695,constant1=1,
@@ -19,7 +17,16 @@ def make_dummy(x,amplitude1=100,sigma1=0.5,x01=695,constant1=1,
     
 def gaussian(x,amplitude,sigma,x0,constant):
     return amplitude/sigma/np.sqrt(2*np.pi)*np.exp(-(x-x0)**2/2/sigma**2)+constant
-        
+
+def remove_spike(y, x=None, nstd=2.):
+    if x is None:
+        x = np.arange(len(y))
+    rj = np.sqrt((x[:-1] - x[1:])**2 + (y[:-1] - y[1:])**2)
+    ind = rj > np.median(rj) + nstd*np.std(rj)
+    spikes_ind = np.hstack(([True], ind[:-1] * ind[1:], [True])) 
+    return (x[~spikes_ind], y[~spikes_ind])
+    
+    
         
 def fit_data(x,y,xmin=None,xmax=None):
     
@@ -40,20 +47,27 @@ def fit_data(x,y,xmin=None,xmax=None):
         y = np.copy(y[np.logical_and(x>xmin,x<xmax)])
         x = np.copy(x[np.logical_and(x>xmin,x<xmax)])
         
+        x, y = remove_spike(y, x=x)
+        
         mod = ConstantModel() + PseudoVoigtModel(prefix='peak1_') + PseudoVoigtModel(prefix='peak2_')
         params = mod.make_params()
         
-        params['c'].set(0)
+        ymax_ind = np.argmax(y)
+        xmax = x[ymax_ind]
         
-        params['peak1_center'].set(x[y==y.max()][0]-0.7,min=x[y==y.max()][0]-5,max=x[y==y.max()][0])
-        params['peak1_sigma'].set(0.5,min=0)
-        params['peak1_amplitude'].set(y.max()*0.5*np.sqrt(2*np.pi)/2,min=0)
+        params['c'].set(0)
+        params.add('psplit', value=1.5, vary=True, min=0.5, max=2.0)
+        
+        params['peak2_center'].set(xmax,min=xmax-0.5,max=x.max())
+        params['peak2_sigma'].set(0.5,min=0.01)
+        params['peak2_amplitude'].set(y[ymax_ind]*0.5*np.sqrt(2*np.pi),min=0)
+        params['peak2_fraction'].set(0.5,min=0,max=1)
+
+        params['peak1_center'].set(vary=False, expr='peak2_center-psplit')
+        params['peak1_sigma'].set(0.5,min=0.01)
+        params['peak1_amplitude'].set(y[ymax_ind]*0.5*np.sqrt(2*np.pi)/2,min=0)
         params['peak1_fraction'].set(0.5,min=0,max=1)
         
-        params['peak2_center'].set(x[y==y.max()],min=x[y==y.max()][0]-0.5,max=x.max())
-        params['peak2_sigma'].set(0.5,min=0)
-        params['peak2_amplitude'].set(y.max()*0.5*np.sqrt(2*np.pi),min=0)
-        params['peak2_fraction'].set(0.5,min=0,max=1)
         
         fit = mod.fit(y,params,x=x)
         
