@@ -272,6 +272,6 @@ class PressureWidget(QGroupBox):
 
 if __name__ == "__main__":
     app = QApplication([])
-    widget = OptionsWidget(parent=None)
+    widget = OptionsWidget()
     widget.show()
     app.exec_()

@@ -33,6 +33,6 @@ class PlotWidget(QWidget):
 
 if __name__ == "__main__":
     app = QApplication([])
-    widget = PlotWidget(parent=None)
+    widget = PlotWidget()
     widget.show()
     app.exec_()
