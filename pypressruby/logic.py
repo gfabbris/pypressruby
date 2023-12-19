@@ -98,8 +98,8 @@ def fit_data(x, y, xmin=None, xmax=None):
 
 
 def calculate_pressure(
-    wavenumber,
-    wavenumber_ref,
+    wavelength,
+    wavelength_ref,
     temperature,
     temperature_ref,
     reference="Dewaele et al. 2008",
@@ -112,8 +112,8 @@ def calculate_pressure(
         A = 1920
         B = 9.61
 
-    # Convert wavenumber to wavelength for T dependence
-    wavelength_ref = 1e7 / wavenumber_ref
+    # Convert wavelength to wavenumber for T dependence
+    wavenumber_ref = 1e7 / wavelength_ref
 
     # Temperature parameters for R1 from Ragan et al. 1992
     a1 = 4.49e-2
@@ -122,7 +122,7 @@ def calculate_pressure(
 
     # Calculating a0 for the reference
     a0 = (
-        wavelength_ref
+        wavenumber_ref
         - a1 * temperature_ref
         - a2 * temperature_ref ** 2
         - a3 * temperature_ref ** 3
@@ -131,12 +131,12 @@ def calculate_pressure(
     # Calculating the corrected wavelength for reference (if temperature is
     # different)
     if np.abs(temperature - temperature_ref) > 0.5:
-        wavelength_ref = (
+        wavenumber_ref = (
             a0
             + a1 * temperature
             + a2 * temperature ** 2
             + a3 * temperature ** 3
         )
-        wavenumber_ref = 1e7 / wavelength_ref
+        wavelength_ref = 1e7 / wavenumber_ref
 
-    return A / B * ((wavenumber / wavenumber_ref) ** B - 1)
+    return A / B * ((wavelength / wavelength_ref) ** B - 1)
